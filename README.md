@@ -1,30 +1,60 @@
-https://github.com/nkholski/phaser3-es6-webpack
+https://github.com/digitsensitive/phaser3-typescript
 
-#### Phaser 3 + ES6 + Webpack
+# Phaser 3 and TypeScript
 
-## 1. Install node.js and npm:
-
-https://nodejs.org/en/
-
-## 2. Install dependencies
-
-Navigate to the cloned repo’s directory.
-
-Run: ```npm install```
-
-## 3. Run the development server:
-
-Run: ```npm run dev```
-
-This will run a server so you can run the game in a browser.
-
-Open your browser and enter localhost:3000 into the address bar.
-
-Also this will start a watch process, so you can change the source and the process will recompile and refresh the browser.
+[Phaser](https://github.com/photonstorm/phaser) 
 
 
-## Build for deployment:
+## Getting started
 
-Run: ```npm run deploy```
+### Prerequisites
 
-This will optimize and minimize the compiled bundle.
+```
+Download and install npm with Node.js @ https://nodejs.org/en
+```
+
+### Installing
+
+Select a folder, navigate to it, and clone this repository
+with this command-line:
+
+```
+git clone
+```
+
+Install the dependencies with this command-line:
+
+```
+npm install
+```
+
+### Building and Running
+
+Perform a quick build (bundle.js) and start server:
+
+```
+npm run dev
+```
+
+## Cheat Sheets
+
+- [Browse to folder](https://github.com/digitsensitive/phaser3-typescript/blob/master/cheatsheets)
+
+## External Resources
+
+- [Phaser 3 Framework](https://github.com/photonstorm/phaser)
+- [Phaser 3 Docs with TypeScript Definition File](https://github.com/photonstorm/phaser3-docs)
+- [Phaser 3 Online Docs](https://photonstorm.github.io/phaser3-docs/index.html)
+- [Phaser 3 Official Examples](https://github.com/photonstorm/phaser3-examples)
+- [Phaser 3 Discourse](https://phaser.discourse.group)
+
+## Helpful tools
+
+- [Leshy SpriteSheet Tool](https://www.leshylabs.com/apps/sstool)
+- [Tiled](https://www.mapeditor.org)
+- [Littera](http://kvazars.com/littera)
+
+## Changelog
+
+[Learn about the latest improvements](https://github.com/digitsensitive/phaser3-typescript/blob/master/CHANGELOG.md)
+
