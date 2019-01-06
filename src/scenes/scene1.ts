@@ -1,13 +1,15 @@
 let player
-let enemy
+let bullets
 let enemies
 let cursors
 let walls
+let enemy
+let bullet
 
 export default class Scene1 extends Phaser.Scene {
-   
+
     constructor() {
-        super({ key: 'Scene1'})
+        super({ key: 'Scene1' })
 
     }
 
@@ -16,6 +18,7 @@ export default class Scene1 extends Phaser.Scene {
         this.load.image('longborder', '../../assets/longborder.png')
         this.load.image('player', '../../assets/player.png')
         this.load.image('enemy', '../../assets/enemy.png')
+        this.load.image('bullet', '../../assets/bullet.png')
     }
 
     create() {
@@ -33,19 +36,23 @@ export default class Scene1 extends Phaser.Scene {
 
         // Enemy
         enemies = this.physics.add.group()
-        const enemy = enemies.create(50, 50, 'enemy');
+        enemy = enemies.create(50, 50, 'enemy');
         enemy.setBounce(1)
         enemy.setCollideWorldBounds(true)
         enemy.setVelocity(Phaser.Math.Between(-200, 200), 50)
         enemy.body.allowGravity = false
-                
+
+        // Bullets
+        bullets = this.physics.add.group()
+        fireBullets()
         
         // Colliders with platforms
         this.physics.add.collider(player, walls)
         this.physics.add.collider(enemies, walls)
 
         // Input events
-        cursors = this.input.keyboard.createCursorKeys ();
+        cursors = this.input.keyboard.createCursorKeys();
+
 
 
     }
@@ -66,5 +73,24 @@ export default class Scene1 extends Phaser.Scene {
         } else {
             player.setVelocityY(0)
         }
+        moveBullet(this.physics)
     }
+}
+
+
+const fireBullets = () => {
+    console.log('bullet fired')
+    //bullet = bullets.create(player.x, player.y, 'bullet')
+    //bullet.setVelocity(20, 0)
+    bullet = bullets.create(player.x, player.y, 'bullet')
+    bullet.body.allowGravity = false
+ 
+
+    //setTimeout(() => {fireBullets()}, 1000)
+}
+
+const moveBullet = (physics) => {
+    physics.accelerateToObject(bullet, enemy,50, 50, 50 )
+    //bullet.x = enemy.x - 10
+    //bullet.y = enemy.y - 10
 }
