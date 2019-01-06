@@ -12,7 +12,6 @@ export default class Scene1 extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('bg', '../../assets/bg.png')
         this.load.image('shortborder', '../../assets/shortborder.png')
         this.load.image('longborder', '../../assets/longborder.png')
         this.load.image('player', '../../assets/player.png')
@@ -20,9 +19,6 @@ export default class Scene1 extends Phaser.Scene {
     }
 
     create() {
-        // Background
-        this.add.image(400,300,'bg')
-
         // Walls
         walls = this.physics.add.staticGroup()
         walls.create(400, 20, 'longborder')
@@ -33,17 +29,20 @@ export default class Scene1 extends Phaser.Scene {
         // Player     
         player = this.physics.add.sprite(400, 300, 'player')
         player.setCollideWorldBounds(true)
-        player.body.allowGravity =false
+        player.body.allowGravity = false
 
         // Enemy
         enemies = this.physics.add.group()
-        enemies.create(50, 50, 'enemy')
+        const enemy = enemies.create(50, 50, 'enemy');
         enemy.setBounce(1)
         enemy.setCollideWorldBounds(true)
+        enemy.setVelocity(Phaser.Math.Between(-200, 200), 50)
+        enemy.body.allowGravity = false
                 
         
-        // Collider
+        // Colliders with platforms
         this.physics.add.collider(player, walls)
+        this.physics.add.collider(enemies, walls)
 
         // Input events
         cursors = this.input.keyboard.createCursorKeys ();
