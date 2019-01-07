@@ -5,6 +5,8 @@ let cursors
 let walls
 let enemy
 let bullet
+let physics
+let scene
 
 export default class Scene1 extends Phaser.Scene {
 
@@ -22,6 +24,9 @@ export default class Scene1 extends Phaser.Scene {
     }
 
     create() {
+        physics = this.physics
+        scene = this.scene
+
         // Walls
         walls = this.physics.add.staticGroup()
         walls.create(400, 20, 'longborder')
@@ -35,26 +40,33 @@ export default class Scene1 extends Phaser.Scene {
         player.body.allowGravity = false
 
         // Enemy
-        enemies = this.physics.add.group()
-        enemy = enemies.create(50, 50, 'enemy');
-        enemy.setBounce(1)
-        enemy.setCollideWorldBounds(true)
-        enemy.setVelocity(Phaser.Math.Between(-200, 200), 50)
-        enemy.body.allowGravity = false
-
+        enemies = this.physics.add.group({
+            key: 'enemy',
+            repeat: 5,
+            setXY: { x: 50, y: 50, stepX: 70 },
+                    })
+        enemies.children.iterate((child) => {
+            child.setBounce(1)
+            child.setCollideWorldBounds(true)
+            child.setVelocity(Phaser.Math.Between(-200, 200), Phaser.Math.Between(-200, 200))
+            child.body.allowGravity = false
+        })
+        
         // Bullets
         bullets = this.physics.add.group()
         fireBullets()
-        
-        // Colliders with platforms
+
+        // Colliders with walls
         this.physics.add.collider(player, walls)
         this.physics.add.collider(enemies, walls)
+        this.physics.add.collider(bullets, walls)
+
+        // Overlaps
+        this.physics.add.overlap(bullets, enemies, bulletHitEnemy, null, this)
+        this.physics.add.overlap(player, enemies, enemyHitPlayer, null, this)
 
         // Input events
         cursors = this.input.keyboard.createCursorKeys();
-
-
-
     }
 
     update() {
@@ -73,24 +85,49 @@ export default class Scene1 extends Phaser.Scene {
         } else {
             player.setVelocityY(0)
         }
-        moveBullet(this.physics)
+        //moveBullet()
     }
 }
 
 
 const fireBullets = () => {
-    console.log('bullet fired')
-    //bullet = bullets.create(player.x, player.y, 'bullet')
-    //bullet.setVelocity(20, 0)
     bullet = bullets.create(player.x, player.y, 'bullet')
+    bullet.body.setVelocity(-200, 0)
     bullet.body.allowGravity = false
- 
 
-    //setTimeout(() => {fireBullets()}, 1000)
+    let bullet2 = bullets.create(player.x, player.y, 'bullet')
+    bullet2.body.setVelocity(200, 0)
+    bullet2.body.allowGravity = false
+
+    let bullet3 = bullets.create(player.x, player.y, 'bullet')
+    bullet3.body.setVelocity(0, -200)
+    bullet3.body.allowGravity = false
+
+    let bullet4 = bullets.create(player.x, player.y, 'bullet')
+    bullet4.body.setVelocity(0, 200)
+    bullet4.body.allowGravity = false
+    //bullet.setData({ enemyTarget: 'test'})
+    setTimeout(() => { fireBullets() }, 1000)
 }
 
-const moveBullet = (physics) => {
-    physics.accelerateToObject(bullet, enemy,50, 50, 50 )
-    //bullet.x = enemy.x - 10
-    //bullet.y = enemy.y - 10
+const moveBullet = () => {
+    //console.log(bullets.children.entries)
+    bullets.children.iterate(child => {
+        physics.moveToObject(child, enemies, 300)
+    })
+}
+
+const bulletHitEnemy = (body1, body2) => {
+    // body1 = bullet, body2 = enemy
+    body1.disableBody(true, true)
+    body2.disableBody(true, true)
+}
+
+const enemyHitPlayer = () => {
+    physics.pause()
+    player.setTint(0xff0000);
+    setTimeout(() => {
+        scene.restart()
+    }, 2000)
+
 }
