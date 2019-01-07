@@ -44,14 +44,15 @@ export default class Scene1 extends Phaser.Scene {
             key: 'enemy',
             repeat: 5,
             setXY: { x: 50, y: 50, stepX: 70 },
-                    })
+        })
         enemies.children.iterate((child) => {
             child.setBounce(1)
             child.setCollideWorldBounds(true)
             child.setVelocity(Phaser.Math.Between(-200, 200), Phaser.Math.Between(-200, 200))
             child.body.allowGravity = false
+            child.setData({ name: 'enemy1' })
         })
-        
+
         // Bullets
         bullets = this.physics.add.group()
         fireBullets()
@@ -85,42 +86,33 @@ export default class Scene1 extends Phaser.Scene {
         } else {
             player.setVelocityY(0)
         }
-        //moveBullet()
+        moveBullet()
     }
 }
 
-
 const fireBullets = () => {
-    bullet = bullets.create(player.x, player.y, 'bullet')
-    bullet.body.setVelocity(-200, 0)
-    bullet.body.allowGravity = false
-
-    let bullet2 = bullets.create(player.x, player.y, 'bullet')
-    bullet2.body.setVelocity(200, 0)
-    bullet2.body.allowGravity = false
-
-    let bullet3 = bullets.create(player.x, player.y, 'bullet')
-    bullet3.body.setVelocity(0, -200)
-    bullet3.body.allowGravity = false
-
-    let bullet4 = bullets.create(player.x, player.y, 'bullet')
-    bullet4.body.setVelocity(0, 200)
-    bullet4.body.allowGravity = false
-    //bullet.setData({ enemyTarget: 'test'})
+    //     if (bullets.children.entries.length < 5 && enemies.children.entries.length > 0) {
+    if (bullets.children.entries.length < enemies.children.entries.length ) {
+        bullet = bullets.create(player.x, player.y, 'bullet')
+        bullet.body.setVelocity(-200, 0)
+        bullet.body.allowGravity = false
+    }
     setTimeout(() => { fireBullets() }, 1000)
 }
 
 const moveBullet = () => {
-    //console.log(bullets.children.entries)
-    bullets.children.iterate(child => {
-        physics.moveToObject(child, enemies, 300)
-    })
+    if (enemies.children.entries.length > 0) {
+        bullets.children.iterate(child => {
+            physics.moveToObject(child, enemies.children.entries[0], 300)
+        })
+    }
+
 }
 
 const bulletHitEnemy = (body1, body2) => {
     // body1 = bullet, body2 = enemy
-    body1.disableBody(true, true)
-    body2.disableBody(true, true)
+    bullets.remove(body1, true, true)
+    enemies.remove(body2, true, true)
 }
 
 const enemyHitPlayer = () => {
