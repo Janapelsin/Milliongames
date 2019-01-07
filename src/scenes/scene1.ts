@@ -7,6 +7,9 @@ let enemy
 let bullet
 let physics
 let scene
+let pointerUse
+let pointerX
+let pointerY
 
 export default class Scene1 extends Phaser.Scene {
 
@@ -43,7 +46,7 @@ export default class Scene1 extends Phaser.Scene {
         enemies = this.physics.add.group({
             key: 'enemy',
             repeat: 5,
-            setXY: { x: 50, y: 50, stepX: 70 },
+            setXY: { x: 50, y: 50, stepX: 5 },
         })
         enemies.children.iterate((child) => {
             child.setBounce(1)
@@ -68,6 +71,15 @@ export default class Scene1 extends Phaser.Scene {
 
         // Input events
         cursors = this.input.keyboard.createCursorKeys();
+
+        this.input.on('pointerdown', () => { 
+            pointerUse = pointerUse === true ? false : true
+        })
+        
+        this.input.on('pointermove', (pointer) => {
+            pointerX = pointer.x
+            pointerY = pointer.y
+        });
     }
 
     update() {
@@ -87,12 +99,16 @@ export default class Scene1 extends Phaser.Scene {
             player.setVelocityY(0)
         }
         moveBullet()
+
+        if (pointerUse === true) {
+            physics.moveTo(player, pointerX, pointerY, 160)
+        }
     }
 }
 
 const fireBullets = () => {
     //     if (bullets.children.entries.length < 5 && enemies.children.entries.length > 0) {
-    if (bullets.children.entries.length < enemies.children.entries.length ) {
+    if (bullets.children.entries.length < enemies.children.entries.length && bullets.children.entries.length < 5) {
         bullet = bullets.create(player.x, player.y, 'bullet')
         bullet.body.setVelocity(-200, 0)
         bullet.body.allowGravity = false
