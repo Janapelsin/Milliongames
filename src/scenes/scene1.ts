@@ -45,7 +45,7 @@ export default class Scene1 extends Phaser.Scene {
         // Enemy
         enemies = this.physics.add.group({
             key: 'enemy',
-            repeat: 5,
+            repeat: 2,
             setXY: { x: 50, y: 50, stepX: 5 },
         })
         enemies.children.iterate((child) => {
@@ -72,10 +72,10 @@ export default class Scene1 extends Phaser.Scene {
         // Input events
         cursors = this.input.keyboard.createCursorKeys();
 
-        this.input.on('pointerdown', () => { 
+        this.input.on('pointerdown', () => {
             pointerUse = pointerUse === true ? false : true
         })
-        
+
         this.input.on('pointermove', (pointer) => {
             pointerX = pointer.x
             pointerY = pointer.y
@@ -129,6 +129,13 @@ const bulletHitEnemy = (body1, body2) => {
     // body1 = bullet, body2 = enemy
     bullets.remove(body1, true, true)
     enemies.remove(body2, true, true)
+    if (enemies.children.entries.length === 0) {
+        physics.pause()
+        player.setTint(0xff0000);
+        setTimeout(() => {
+            scene.restart()
+        }, 2000)
+    }
 }
 
 const enemyHitPlayer = () => {
