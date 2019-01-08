@@ -10,6 +10,7 @@ let scene
 let pointerUse
 let pointerX
 let pointerY
+let lastBulletShot
 
 export default class Scene1 extends Phaser.Scene {
 
@@ -45,7 +46,7 @@ export default class Scene1 extends Phaser.Scene {
         // Enemy
         enemies = this.physics.add.group({
             key: 'enemy',
-            repeat: 2,
+            repeat: 30,
             setXY: { x: 50, y: 50, stepX: 5 },
         })
         enemies.children.iterate((child) => {
@@ -53,12 +54,11 @@ export default class Scene1 extends Phaser.Scene {
             child.setCollideWorldBounds(true)
             child.setVelocity(Phaser.Math.Between(-200, 200), Phaser.Math.Between(-200, 200))
             child.body.allowGravity = false
-            child.setData({ name: 'enemy1' })
         })
 
         // Bullets
         bullets = this.physics.add.group()
-        fireBullets()
+        //fireBullets()
 
         // Colliders with walls
         this.physics.add.collider(player, walls)
@@ -83,49 +83,105 @@ export default class Scene1 extends Phaser.Scene {
     }
 
     update() {
-        if (cursors.left.isDown) {
-            player.setVelocityX(-160)
-        } else if (cursors.right.isDown) {
-            player.setVelocityX(160)
-        } else {
-            player.setVelocityX(0)
-        }
+        if (pointerUse !== true) {
+            if (cursors.left.isDown) {
+                player.setVelocityX(-160)
+            } else if (cursors.right.isDown) {
+                player.setVelocityX(160)
+            } else {
+                player.setVelocityX(0)
+            }
 
-        if (cursors.up.isDown) {
-            player.setVelocityY(-160)
-        } else if (cursors.down.isDown) {
-            player.setVelocityY(160)
-        } else {
-            player.setVelocityY(0)
-        }
-        moveBullet()
-
-        if (pointerUse === true) {
+            if (cursors.up.isDown) {
+                player.setVelocityY(-160)
+            } else if (cursors.down.isDown) {
+                player.setVelocityY(160)
+            } else {
+                player.setVelocityY(0)
+            }
+        } else if (pointerUse === true) {
             physics.moveTo(player, pointerX, pointerY, 160)
         }
+
+        moveBullet()
+
+        // if last bullet has been shot less than 0.5s before does nothing, else triggers fireBullets
+        if (Date.now() - lastBulletShot > 500 || lastBulletShot == undefined) {
+            fireBullets()
+        }
+
+
     }
 }
 
 const fireBullets = () => {
-    //     if (bullets.children.entries.length < 5 && enemies.children.entries.length > 0) {
+    // if there less than 5 bullets and less bullets than enemies
     if (bullets.children.entries.length < enemies.children.entries.length && bullets.children.entries.length < 5) {
-        bullet = bullets.create(player.x, player.y, 'bullet')
-        bullet.body.setVelocity(-200, 0)
-        bullet.body.allowGravity = false
+        // get closest target => return either index of the enemy or null when no enemy found near the player (3rd param = distance)
+        const enemyTargetIndex = getClosestEnemy(player.x, player.y, 200)
+        // if there is an enemy within distance create bullet
+        if (enemyTargetIndex != null) {
+            bullet = bullets.create(player.x, player.y, 'bullet')
+            bullet.body.allowGravity = false
+            bullet.setData({ enemyTargetIndex: enemyTargetIndex })
+            lastBulletShot = Date.now()
+
+        }
     }
-    setTimeout(() => { fireBullets() }, 1000)
 }
 
 const moveBullet = () => {
-    if (enemies.children.entries.length > 0) {
-        bullets.children.iterate(child => {
-            physics.moveToObject(child, enemies.children.entries[0], 300)
-        })
-    }
+    const range = 250
+    // iterates over each bullet
+    bullets.children.iterate(child => {
+        // to prevent bugs, return nothing when child = undefined
+        if (child == undefined) {
+            return
+        } else {
+            const enemyTargetIndex = child.data.values.enemyTargetIndex
+            if (enemies.children.entries[enemyTargetIndex] == undefined) {
+                child.destroy()
+            } else if (Phaser.Math.Distance.Between(player.x, player.y, child.x, child.y) > range) {
+                child.destroy()
+            } else {
+                physics.moveToObject(child, enemies.children.entries[enemyTargetIndex], 400)
+            }
 
+        }
+    })
+}
+
+
+const getClosestEnemy = (x, y, distance) => {
+    var enemyUnits = enemies.getChildren();
+    let enemiesPosition: Array<{}> = []
+    for (var i = 0; i < enemyUnits.length; i++) {
+        const pos = Phaser.Math.Distance.Between(x, y, enemyUnits[i].x, enemyUnits[i].y)
+        if (pos < distance) {
+            enemiesPosition.push(pos)
+        } else {
+            enemiesPosition.push(1000)
+        }
+    }
+    const lowestPos = Math.min.apply(Math, enemiesPosition)
+    if (lowestPos > distance) {
+        return null
+    } else {
+        const indexPos = enemiesPosition.findIndex(i => i == lowestPos)
+        return indexPos
+    }
 }
 
 const bulletHitEnemy = (body1, body2) => {
+    // sets new enemy target for each bullet who shared the same target
+    const bodyEnemyTargetIndex = body1.getData('enemyTargetIndex')
+    bullets.children.iterate(child => {
+        const childEnemyTargetIndex = child.getData('enemyTargetIndex')
+        if (childEnemyTargetIndex == bodyEnemyTargetIndex) {
+            const closestEnemyId = getClosestEnemy(child.x, child.y, 1000)
+            child.setData({ enemyTargetIndex: closestEnemyId })
+        }
+    })
     // body1 = bullet, body2 = enemy
     bullets.remove(body1, true, true)
     enemies.remove(body2, true, true)
@@ -146,3 +202,4 @@ const enemyHitPlayer = () => {
     }, 2000)
 
 }
+
